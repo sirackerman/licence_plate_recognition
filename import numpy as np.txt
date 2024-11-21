@@ -1,0 +1,62 @@
+import numpy as np
+import cv2
+ 
+    
+# Read the query image as query_img
+# and train image This query image
+# is what you need to find in train image
+# Save it in the same directory
+# with the name image.jpg  
+query_img = cv2.imread('D:\Desktop\The-Eiffel-Tower-2857014299.jpg')
+train_img = cv2.imread('D:\Desktop\tour eiffeil 2.jpg')
+ 
+I'm tryting to run this code:
+
+# Convert it to grayscale
+query_img_bw = cv2.cvtColor(query_img,cv2.COLOR_BGR2GRAY)
+train_img_bw = cv2.cvtColor(train_img, cv2.COLOR_BGR2GRAY)
+ 
+# Initialize the ORB detector algorithm
+orb = cv2.ORB_create()
+ 
+# Now detect the keypoints and compute
+# the descriptors for the query image
+# and train image
+queryKeypoints, queryDescriptors = orb.detectAndCompute(query_img_bw,None)
+trainKeypoints, trainDescriptors = orb.detectAndCompute(train_img_bw,None)
+
+# Initialize the Matcher for matching
+# the keypoints and then match the
+# keypoints
+matcher = cv2.BFMatcher()
+matches = matcher.match(queryDescriptors,trainDescriptors)
+ 
+# draw the matches to the final image
+# containing both the images the drawMatches()
+# function takes both images and keypoints
+# and outputs the matched query image with
+# its train image
+final_img = cv2.drawMatches(query_img, queryKeypoints, 
+train_img, trainKeypoints, matches[:20],None)
+ 
+final_img = cv2.resize(final_img, (1000,650))
+
+# Show the final image
+cv2.imshow("Matches", final_img)
+cv2.waitKey(3000)
+
+but i'm getting this error:
+
+PS C:\Users\Ariano> & C:/Users/Ariano/AppData/Local/Programs/Python/Python312/python.exe "d:/Desktop/Slam/slam programming/ORB features matching.py"
+d:\Desktop\Slam\slam programming\ORB features matching.py:10: SyntaxWarning: invalid escape sequence '\D'
+  query_img = cv2.imread('D:\Desktop\The-Eiffel-Tower-2857014299.jpg')
+d:\Desktop\Slam\slam programming\ORB features matching.py:11: SyntaxWarning: invalid escape sequence '\D'
+  train_img = cv2.imread('D:\Desktop\tour eiffeil 2.jpg')
+[ WARN:0@0.075] global loadsave.cpp:241 cv::findDecoder imread_('D:\Desktop     our eiffeil 2.jpg'): can't open/read file: check file path/integrity
+Traceback (most recent call last):
+  File "d:\Desktop\Slam\slam programming\ORB features matching.py", line 15, in <module>
+    train_img_bw = cv2.cvtColor(train_img, cv2.COLOR_BGR2GRAY)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+cv2.error: OpenCV(4.10.0) D:\a\opencv-python\opencv-python\opencv\modules\imgproc\src\color.cpp:196: error: (-215:Assertion failed) !_src.empty() in function 'cv::cvtColor'
+
+Help me fix it

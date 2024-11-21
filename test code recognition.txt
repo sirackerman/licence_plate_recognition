@@ -1,0 +1,60 @@
+test code recognition
+
+% Read the input image
+inputImage = imread('D:\Desktop\ECE\Machine vision and Intelligent systems\Projects\project 1\vehicle plate\grayscale image.png');
+
+% Convert the image to grayscale
+grayImage = rgb2gray(inputImage);
+
+% Use imbinarize to create a binary image
+binaryImage = imbinarize(grayImage);
+
+% Remove small objects and noise
+binaryImage = bwareaopen(binaryImage, 500);
+
+% Find connected components in the binary image
+cc = bwconncomp(binaryImage);
+
+% Measure properties of connected components
+stats = regionprops(cc, 'BoundingBox', 'Area');
+
+% Sort regions by area in descending order
+[~, idx] = sort([stats.Area], 'descend');
+
+% Display the original image with bounding boxes around potential plates
+figure;
+imshow(inputImage);
+hold on;
+
+% Initialize variables for the bounding box
+licensePlateFound = false;
+
+% Iterate through bounding boxes, starting with the largest
+for i = 1:length(idx)
+    % Extract the region of interest (ROI) containing the potential license plate
+    roi = imcrop(inputImage, stats(idx(i)).BoundingBox);
+    
+    % Perform OCR on the cropped image with adjusted OCR parameters
+    licensePlateText = ocr(roi, 'CharacterSet', '粤ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', 'TextLayout', 'Block', 'Language', 'ChineseSimplified');
+
+    % Check if the OCR result is reasonable (you may need to adjust this condition)
+    if ~isempty(licensePlateText.Text) && length(licensePlateText.Text) >= 9
+        licensePlateFound = true;
+        
+        % Draw bounding box on the original image
+        rectangle('Position', stats(idx(i)).BoundingBox, 'EdgeColor', 'r', 'LineWidth', 2);
+        
+        % Display the recognized license plate text
+        fprintf('License Plate Number: %s\n', licensePlateText.Text);
+        
+        % Break out of the loop once a valid license plate is found
+        break;
+    end
+end
+
+hold off;
+
+% Display a message if no license plate is found
+if ~licensePlateFound
+    fprintf('No Chinese license plate found in the image.\n');
+end

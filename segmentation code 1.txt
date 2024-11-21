@@ -1,0 +1,28 @@
+segmentation code 1
+D:\Desktop\ECE\Machine vision and Intelligent systems\Projects\project 1\vehicle plate\c.jpg
+
+% Read the input image
+inputImage = imread('D:\Desktop\ECE\Machine vision and Intelligent systems\Projects\project 1\vehicle plate\c16.jpg');
+
+% Convert the image to grayscale
+grayImage = rgb2gray(inputImage);
+
+% Apply adaptive thresholding
+binaryImage = imbinarize(grayImage, 'adaptive', 'ForegroundPolarity', 'dark');
+
+% Perform connected component analysis
+cc = bwconncomp(binaryImage);
+stats = regionprops(cc, 'BoundingBox');
+
+% Display the binary image
+figure;
+imshow(binaryImage);
+hold on;
+
+% Highlight each character with a red rectangle
+for i = 1:length(stats)
+    rectangle('Position', stats(i).BoundingBox, 'EdgeColor', 'r', 'LineWidth', 2);
+end
+
+hold off;
+title('Highlighted Characters on Binary Image');

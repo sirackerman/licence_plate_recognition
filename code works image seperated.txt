@@ -1,0 +1,72 @@
+code works image seperated
+
+% Read the input picture
+pic = imread('D:\Desktop\ECE\Machine vision and Intelligent systems\Projects\project 1\vehicle plate\c3-4.jpg');
+
+% Convert the Picture to grayscale image
+grayimg = rgb2gray(pic);
+
+% Display the original image
+figure;
+imshow(imresize(pic, 0.5));
+title('Original Picture');
+
+% Open a new figure for the grayscale image
+figure;
+imshow(grayimg);
+title('Grayscale Image');
+
+% Binarize the grayscale image
+binimg = imbinarize(grayimg);
+
+% Open a new figure for the binary image
+figure;
+imshow(binimg);
+title('Binary Image');
+
+% Apply edge detection using the Prewitt operator
+edgedimg = edge(grayimg, 'prewitt');
+
+% Open a new figure for the edge-detected image
+figure;
+imshow(edgedimg);
+title('Edge-Detected Image');
+
+% Below steps are to find the location of the number plate
+Iprops = regionprops(edgedimg, 'BoundingBox', 'Area', 'Image');
+area = [Iprops.Area];
+[~, idx] = max(area);
+
+% Crop the number plate area
+boundingBox = Iprops(idx).BoundingBox;
+croppedimg = imcrop(binimg, boundingBox);
+
+% Remove small objects in the cropped image
+croppedimg = bwareaopen(~croppedimg, 500);
+
+% Get the width of the cropped image
+[h, w] = size(croppedimg);
+
+% Read letters from the segmented image
+Iprops_letters = regionprops(croppedimg, 'BoundingBox', 'Image');
+noPlate = '';
+
+% Iterate through letters and append to the number plate string
+for i = 1:numel(Iprops_letters)
+    ow = size(Iprops_letters(i).Image, 2);
+    oh = size(Iprops_letters(i).Image, 1);
+
+    if ow < (w / 2) && oh > (h / 3)
+        % Use OCR to recognize letters
+        letter = ocr(Iprops_letters(i).Image, 'TextLayout', 'Block');
+        noPlate = [noPlate letter.Text];
+    end
+end
+
+% Open a new figure for the detected license plate
+figure;
+imshow(croppedimg);
+hold on;
+title('Detected License Plate');
+
+hold off;
